@@ -23,7 +23,6 @@ func GenericController(controllerName string) GenericControllerOutput {
 	if strings.HasPrefix(controllerName, "/") {
 		controllerName = controllerName[1:]
 	}
-	fmt.Println(controllerName)
 	return GenericControllerOutput{
 		ControllerName: controllerName,
 
