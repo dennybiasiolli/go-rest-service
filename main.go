@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"go-rest-service/controllers"
+	"go-rest-service/middlewares"
 	"go-rest-service/views"
 	"log"
 	"net/http"
@@ -26,6 +27,7 @@ func main() {
 	flag.Parse()
 
 	router := mux.NewRouter()
+	router.Use(middlewares.LoggingMiddleware)
 
 	controller := controllers.GenericController("customName")
 	views.GenericView(&views.GenericViewInput{
