@@ -3,58 +3,65 @@ package views
 import (
 	"fmt"
 	"go-rest-service/controllers"
+	"net/http"
 	"strings"
 
 	"github.com/gorilla/mux"
 )
 
-type GenericView struct {
-	router     *mux.Router
-	subrouter  *mux.Router
-	pathPrefix string
-	controller controllers.GenericController
+type GenericViewInput struct {
+	Router     *mux.Router
+	PathPrefix string
+	Controller *controllers.GenericControllerOutput
 }
 
-func NewGenericView(
-	router *mux.Router,
-	pathPrefix string,
-	controller *controllers.GenericController,
-) GenericView {
-	if controller == nil {
-		innerController := controllers.NewGenericController(pathPrefix)
-		controller = &innerController
+type GenericViewOutput struct {
+	Router     *mux.Router
+	Subrouter  *mux.Router
+	PathPrefix string
+	Controller controllers.GenericControllerOutput
+}
+
+func GenericView(
+	input *GenericViewInput,
+) GenericViewOutput {
+	var controller controllers.GenericControllerOutput
+	if input.Controller == nil {
+		controller = controllers.GenericController(input.PathPrefix)
+	} else {
+		controller = *input.Controller
 	}
-	if strings.HasPrefix(pathPrefix, "/") == false {
-		pathPrefix = fmt.Sprintf("/%s", pathPrefix)
+	if strings.HasPrefix(input.PathPrefix, "/") == false {
+		input.PathPrefix = fmt.Sprintf("/%s", input.PathPrefix)
 	}
-	subrouter := router.PathPrefix(pathPrefix).Subrouter()
+	subrouter := input.Router.PathPrefix(input.PathPrefix).Subrouter()
 	subrouter.
 		HandleFunc("/", controller.GetAll).
-		Methods("GET")
+		Methods(http.MethodGet)
 
 	subrouter.
 		HandleFunc("/{id:[0-9]+}/", controller.Get).
-		Methods("GET")
+		Methods(http.MethodGet)
 
 	subrouter.
 		HandleFunc("/", controller.Post).
-		Methods("POST")
+		Methods(http.MethodPost)
 
 	subrouter.
 		HandleFunc("/{id:[0-9]+}/", controller.Put).
-		Methods("PUT")
+		Methods(http.MethodPut)
 	subrouter.
 		HandleFunc("/{id:[0-9]+}/", controller.Patch).
-		Methods("PATCH")
+		Methods(http.MethodPatch)
 
 	subrouter.
 		HandleFunc("/{id:[0-9]+}/", controller.Delete).
-		Methods("DELETE")
+		Methods(http.MethodDelete)
 
-	return GenericView{
-		router:     router,
-		subrouter:  subrouter,
-		pathPrefix: pathPrefix,
-		controller: *controller,
+	return GenericViewOutput{
+		Router:     input.Router,
+		Subrouter:  subrouter,
+		PathPrefix: input.PathPrefix,
+		Controller: controller,
 	}
 }

@@ -9,8 +9,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type GenericController struct {
-	controllerName string
+type GenericControllerOutput struct {
+	ControllerName string
 	GetAll         func(w http.ResponseWriter, r *http.Request)
 	Get            func(w http.ResponseWriter, r *http.Request)
 	Post           func(w http.ResponseWriter, r *http.Request)
@@ -19,13 +19,13 @@ type GenericController struct {
 	Delete         func(w http.ResponseWriter, r *http.Request)
 }
 
-func NewGenericController(controllerName string) GenericController {
+func GenericController(controllerName string) GenericControllerOutput {
 	if strings.HasPrefix(controllerName, "/") {
 		controllerName = controllerName[1:]
 	}
 	fmt.Println(controllerName)
-	return GenericController{
-		controllerName: controllerName,
+	return GenericControllerOutput{
+		ControllerName: controllerName,
 
 		GetAll: func(w http.ResponseWriter, r *http.Request) {
 			utils.Respond(w, utils.Message(

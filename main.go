@@ -12,10 +12,23 @@ import (
 
 func main() {
 	router := mux.NewRouter()
-	c := controllers.NewGenericController("customName")
-	views.NewGenericView(router, "/products", &c)
-	views.NewGenericView(router, "articles", nil)
-	views.NewGenericView(router, "/quotes", nil)
+
+	c := controllers.GenericController("customName")
+	views.GenericView(&views.GenericViewInput{
+		Router:     router,
+		PathPrefix: "/products",
+		Controller: &c,
+	})
+
+	views.GenericView(&views.GenericViewInput{
+		Router:     router,
+		PathPrefix: "articles",
+	})
+
+	views.GenericView(&views.GenericViewInput{
+		Router:     router,
+		PathPrefix: "/quotes",
+	})
 
 	port := os.Getenv("PORT") //Get port from .env file, we did not specify any port so this should return an empty string when tested locally
 	if port == "" {
