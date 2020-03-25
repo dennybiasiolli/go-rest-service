@@ -28,6 +28,9 @@ func main() {
 
 	router := mux.NewRouter()
 	router.Use(middlewares.LoggingMiddleware)
+	// enabling CORS
+	router.Methods(http.MethodOptions)
+	router.Use(middlewares.CORSMiddleware)
 
 	controller := controllers.GenericController("customName")
 	views.GenericView(&views.GenericViewInput{
