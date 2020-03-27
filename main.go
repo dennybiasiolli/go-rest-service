@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"go-rest-service/controllers"
 	"go-rest-service/middlewares"
+	"go-rest-service/models"
+	"go-rest-service/utils"
 	"go-rest-service/views"
 	"log"
 	"net/http"
@@ -14,9 +16,34 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
 )
 
 func main() {
+	utils.DbOperation(func(db *gorm.DB) {
+		// Migrate the schema
+		db.AutoMigrate(
+			&models.Product{},
+			&models.ResUser{},
+		)
+
+		// Create
+		db.Create(&models.Product{Code: "L1212", Price: 123})
+
+		// Read
+		var product models.Product
+		var products []models.Product
+		db.First(&product, 1)                   // find product with id 1
+		db.First(&product, "code = ?", "L1212") // find product with code l1212
+		db.Find(&products, "price > ?", 10)     // find products with price > 10
+
+		// Update - update product's price to 2000
+		db.Model(&product).Update("Price", 2000)
+
+		// Delete - delete product
+		db.Delete(&product)
+	})
+
 	var wait time.Duration
 	flag.DurationVar(
 		&wait,
