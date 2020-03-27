@@ -7,6 +7,7 @@ import (
 	"go-rest-service/controllers"
 	"go-rest-service/middlewares"
 	"go-rest-service/models"
+	"go-rest-service/serializers"
 	"go-rest-service/utils"
 	"go-rest-service/views"
 	"log"
@@ -42,6 +43,21 @@ func main() {
 
 		// Delete - delete product
 		db.Delete(&product)
+	})
+
+	utils.DbOperation(func(db *gorm.DB) {
+		var count int
+		db.Model(&models.ResUser{}).Count(&count)
+		fmt.Println("Count", count)
+
+		var users []models.ResUser
+		db.
+			Select([]string{"login", "password", "password_crypt"}).
+			Where("login = ?", "admin").
+			Find(&users)
+		for _, user := range users {
+			fmt.Println("Users", serializers.ResUserTinySerializer(&user))
+		}
 	})
 
 	var wait time.Duration
