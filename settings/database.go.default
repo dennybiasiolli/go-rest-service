@@ -1,0 +1,24 @@
+package settings
+
+import (
+	// _ "github.com/jinzhu/gorm/dialects/mssql"
+	// _ "github.com/jinzhu/gorm/dialects/mysql"
+	// _ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+)
+
+/*
+	Database connection.
+	Make sure to read https://gorm.io/docs/connecting_to_the_database.html
+	for details.
+	Remember to uncomment the correct dialect import on top of this file
+*/
+const (
+	// DatabaseDialect can be "mysql", "postgres", "sqlite3", or "mssql"
+	// Refer to https://gorm.io/docs/connecting_to_the_database.html for details
+	DatabaseDialect = "sqlite3"
+
+	// ConnectionString contains the connection string to the database
+	// Refer to https://gorm.io/docs/connecting_to_the_database.html for details
+	DatabaseConnectionString = "test.db"
+)
