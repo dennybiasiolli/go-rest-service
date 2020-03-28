@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"go-rest-service/controllers"
 	"go-rest-service/middlewares"
 	"go-rest-service/models"
 	"go-rest-service/serializers"
@@ -29,20 +28,20 @@ func main() {
 		)
 
 		// Create
-		db.Create(&models.Product{Code: "L1212", Price: 123})
+		// db.Create(&models.Product{Code: "L1212", Price: 123})
 
 		// Read
-		var product models.Product
-		var products []models.Product
-		db.First(&product, 1)                   // find product with id 1
-		db.First(&product, "code = ?", "L1212") // find product with code l1212
-		db.Find(&products, "price > ?", 10)     // find products with price > 10
+		// var product models.Product
+		// var products []models.Product
+		// db.First(&product, 1)                   // find product with id 1
+		// db.First(&product, "code = ?", "L1212") // find product with code l1212
+		// db.Find(&products, "price > ?", 10)     // find products with price > 10
 
 		// Update - update product's price to 2000
-		db.Model(&product).Update("Price", 2000)
+		// db.Model(&product).Update("Price", 2000)
 
 		// Delete - delete product
-		db.Delete(&product)
+		// db.Delete(&product)
 	})
 
 	utils.DbOperation(func(db *gorm.DB) {
@@ -75,21 +74,23 @@ func main() {
 	router.Methods(http.MethodOptions)
 	router.Use(middlewares.CORSMiddleware)
 
-	controller := controllers.GenericController("customName")
+	// controller := controllers.GenericController("customName")
+	// views.GenericView(&views.GenericViewInput{
+	// 	Router:     router,
+	// 	PathPrefix: "/products",
+	// 	Controller: &controller,
+	// })
+
 	views.GenericView(&views.GenericViewInput{
 		Router:     router,
 		PathPrefix: "/products",
-		Controller: &controller,
+		ModelPtr:   &models.Product{},
 	})
 
 	views.GenericView(&views.GenericViewInput{
 		Router:     router,
-		PathPrefix: "articles",
-	})
-
-	views.GenericView(&views.GenericViewInput{
-		Router:     router,
-		PathPrefix: "/quotes",
+		PathPrefix: "/res-users",
+		ModelPtr:   &models.ResUser{},
 	})
 
 	host := os.Getenv("HOST")

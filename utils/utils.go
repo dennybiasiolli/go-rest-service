@@ -18,6 +18,15 @@ func Respond(w http.ResponseWriter, data map[string]interface{}) {
 	json.NewEncoder(w).Encode(data)
 }
 
+func JsonRespond(w http.ResponseWriter, data interface{}) {
+	JsonRespondWithStatus(w, data, http.StatusOK)
+}
+func JsonRespondWithStatus(w http.ResponseWriter, data interface{}, httpStatus int) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(httpStatus)
+	json.NewEncoder(w).Encode(data)
+}
+
 func DbOperation(fn func(db *gorm.DB)) {
 	log.Println("Opening db conn...")
 	db, err := gorm.Open(settings.DatabaseDialect, settings.DatabaseConnectionString)

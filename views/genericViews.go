@@ -13,6 +13,7 @@ type GenericViewInput struct {
 	Router     *mux.Router
 	PathPrefix string
 	Controller *controllers.GenericControllerOutput
+	ModelPtr   interface{}
 }
 
 type GenericViewOutput struct {
@@ -20,6 +21,7 @@ type GenericViewOutput struct {
 	Subrouter  *mux.Router
 	PathPrefix string
 	Controller controllers.GenericControllerOutput
+	ModelPtr   interface{}
 }
 
 func GenericView(
@@ -27,13 +29,14 @@ func GenericView(
 ) GenericViewOutput {
 	var controller controllers.GenericControllerOutput
 	if input.Controller == nil {
-		controller = controllers.GenericController(input.PathPrefix)
+		controller = controllers.GenericController(input.PathPrefix, input.ModelPtr)
 	} else {
 		controller = *input.Controller
 	}
 	if strings.HasPrefix(input.PathPrefix, "/") == false {
 		input.PathPrefix = fmt.Sprintf("/%s", input.PathPrefix)
 	}
+
 	subrouter := input.Router.PathPrefix(input.PathPrefix).Subrouter()
 	subrouter.
 		HandleFunc("/", controller.GetAll).
@@ -63,5 +66,6 @@ func GenericView(
 		Subrouter:  subrouter,
 		PathPrefix: input.PathPrefix,
 		Controller: controller,
+		ModelPtr:   input.ModelPtr,
 	}
 }
