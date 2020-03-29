@@ -1,9 +1,8 @@
-package controllers
+package utils
 
 import (
 	"encoding/json"
 	"fmt"
-	"go-rest-service/utils"
 	"net/http"
 	"reflect"
 	"strings"
@@ -36,29 +35,29 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 		ModelPtr:       modelPtr,
 
 		GetAll: func(w http.ResponseWriter, r *http.Request) {
-			utils.DbOperation(func(db *gorm.DB) {
+			DbOperation(func(db *gorm.DB) {
 				resultsPtr := reflect.New(reflect.SliceOf(T)).Interface()
 				db.Find(resultsPtr)
-				utils.JsonRespond(w, resultsPtr)
+				JsonRespond(w, resultsPtr)
 			})
 		},
 
 		Get: func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
-			utils.DbOperation(func(db *gorm.DB) {
+			DbOperation(func(db *gorm.DB) {
 				resultPtr := reflect.New(T).Interface()
 				res := db.First(resultPtr, vars["id"])
 				if res.RecordNotFound() {
-					utils.JsonRespondWithStatus(w, map[string]interface{}{
+					JsonRespondWithStatus(w, map[string]interface{}{
 						"error":   true,
 						"message": fmt.Sprintf("%s with ID %s not found", controllerName, vars["id"]),
 					}, http.StatusNotFound)
 					return
 				} else if err := res.Error; err != nil {
-					utils.JsonRespondWithStatus(w, err, http.StatusBadRequest)
+					JsonRespondWithStatus(w, err, http.StatusBadRequest)
 					return
 				}
-				utils.JsonRespond(w, resultPtr)
+				JsonRespond(w, resultPtr)
 			})
 		},
 
@@ -70,7 +69,7 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 			// respond to the client with the error message and a 400 status code.
 			err := json.NewDecoder(r.Body).Decode(&modelDataPtr)
 			if err != nil {
-				utils.JsonRespondWithStatus(w, map[string]interface{}{
+				JsonRespondWithStatus(w, map[string]interface{}{
 					"Severity": "error",
 					"Message":  "Unable to parse JSON body.",
 				}, http.StatusBadRequest)
@@ -78,12 +77,12 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 			}
 
 			// try to create the record into the database
-			utils.DbOperation(func(db *gorm.DB) {
+			DbOperation(func(db *gorm.DB) {
 				if err := db.Create(modelDataPtr).Error; err != nil {
-					utils.JsonRespondWithStatus(w, err, http.StatusBadRequest)
+					JsonRespondWithStatus(w, err, http.StatusBadRequest)
 					return
 				}
-				utils.JsonRespond(w, modelDataPtr)
+				JsonRespond(w, modelDataPtr)
 			})
 		},
 
@@ -98,7 +97,7 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 			// respond to the client with the error message and a 400 status code.
 			err := json.NewDecoder(r.Body).Decode(&newModelDataPtr)
 			if err != nil {
-				utils.JsonRespondWithStatus(w, map[string]interface{}{
+				JsonRespondWithStatus(w, map[string]interface{}{
 					"Severity": "error",
 					"Message":  "Unable to parse JSON body.",
 				}, http.StatusBadRequest)
@@ -106,23 +105,23 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 			}
 
 			// try to update the record into the database
-			utils.DbOperation(func(db *gorm.DB) {
+			DbOperation(func(db *gorm.DB) {
 				res := db.First(modelDataPtr, vars["id"])
 				if res.RecordNotFound() {
-					utils.JsonRespondWithStatus(w, map[string]interface{}{
+					JsonRespondWithStatus(w, map[string]interface{}{
 						"error":   true,
 						"message": fmt.Sprintf("%s with ID %s not found", controllerName, vars["id"]),
 					}, http.StatusNotFound)
 					return
 				} else if err := res.Error; err != nil {
-					utils.JsonRespondWithStatus(w, err, http.StatusBadRequest)
+					JsonRespondWithStatus(w, err, http.StatusBadRequest)
 					return
 				}
 
 				id := reflect.ValueOf(modelDataPtr).Elem().FieldByName("ID").Int()
 				newIDField := reflect.ValueOf(newModelDataPtr).Elem().FieldByName("ID")
 				if newIDField.IsValid() && id != newIDField.Int() {
-					utils.JsonRespondWithStatus(w, map[string]interface{}{
+					JsonRespondWithStatus(w, map[string]interface{}{
 						"error": true,
 						"message": fmt.Sprintf(
 							"Unable to change ID of %s from %v to %v. PRs are welcome!",
@@ -134,10 +133,10 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 
 				res = db.Model(modelDataPtr).Updates(newModelDataPtr)
 				if err := res.Error; err != nil {
-					utils.JsonRespondWithStatus(w, err, http.StatusBadRequest)
+					JsonRespondWithStatus(w, err, http.StatusBadRequest)
 					return
 				}
-				utils.JsonRespond(w, modelDataPtr)
+				JsonRespond(w, modelDataPtr)
 			})
 		},
 
@@ -152,7 +151,7 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 			// respond to the client with the error message and a 400 status code.
 			err := json.NewDecoder(r.Body).Decode(&newModelDataPtr)
 			if err != nil {
-				utils.JsonRespondWithStatus(w, map[string]interface{}{
+				JsonRespondWithStatus(w, map[string]interface{}{
 					"Severity": "error",
 					"Message":  "Unable to parse JSON body.",
 				}, http.StatusBadRequest)
@@ -160,23 +159,23 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 			}
 
 			// try to update the record into the database
-			utils.DbOperation(func(db *gorm.DB) {
+			DbOperation(func(db *gorm.DB) {
 				res := db.First(modelDataPtr, vars["id"])
 				if res.RecordNotFound() {
-					utils.JsonRespondWithStatus(w, map[string]interface{}{
+					JsonRespondWithStatus(w, map[string]interface{}{
 						"error":   true,
 						"message": fmt.Sprintf("%s with ID %s not found", controllerName, vars["id"]),
 					}, http.StatusNotFound)
 					return
 				} else if err := res.Error; err != nil {
-					utils.JsonRespondWithStatus(w, err, http.StatusBadRequest)
+					JsonRespondWithStatus(w, err, http.StatusBadRequest)
 					return
 				}
 
 				id := reflect.ValueOf(modelDataPtr).Elem().FieldByName("ID").Int()
 				newIDField := reflect.ValueOf(newModelDataPtr).Elem().FieldByName("ID")
 				if newIDField.IsValid() && id != newIDField.Int() {
-					utils.JsonRespondWithStatus(w, map[string]interface{}{
+					JsonRespondWithStatus(w, map[string]interface{}{
 						"error": true,
 						"message": fmt.Sprintf(
 							"Unable to change ID of %s from %v to %v. PRs are welcome!",
@@ -188,10 +187,10 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 
 				res = db.Model(modelDataPtr).Updates(newModelDataPtr)
 				if err := res.Error; err != nil {
-					utils.JsonRespondWithStatus(w, err, http.StatusBadRequest)
+					JsonRespondWithStatus(w, err, http.StatusBadRequest)
 					return
 				}
-				utils.JsonRespond(w, modelDataPtr)
+				JsonRespond(w, modelDataPtr)
 			})
 		},
 
@@ -202,25 +201,25 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 			modelDataPtr := reflect.New(T).Interface()
 
 			// try to delete the record into the database
-			utils.DbOperation(func(db *gorm.DB) {
+			DbOperation(func(db *gorm.DB) {
 				res := db.First(modelDataPtr, vars["id"])
 				if res.RecordNotFound() {
-					utils.JsonRespondWithStatus(w, map[string]interface{}{
+					JsonRespondWithStatus(w, map[string]interface{}{
 						"error":   true,
 						"message": fmt.Sprintf("%s with ID %s not found", controllerName, vars["id"]),
 					}, http.StatusNotFound)
 					return
 				} else if err := res.Error; err != nil {
-					utils.JsonRespondWithStatus(w, err, http.StatusBadRequest)
+					JsonRespondWithStatus(w, err, http.StatusBadRequest)
 					return
 				}
 
 				res = db.Model(modelDataPtr).Delete(modelDataPtr)
 				if err := res.Error; err != nil {
-					utils.JsonRespondWithStatus(w, err, http.StatusBadRequest)
+					JsonRespondWithStatus(w, err, http.StatusBadRequest)
 					return
 				}
-				utils.JsonRespond(w, modelDataPtr)
+				JsonRespond(w, modelDataPtr)
 			})
 		},
 	}

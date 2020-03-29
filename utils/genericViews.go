@@ -1,8 +1,7 @@
-package views
+package utils
 
 import (
 	"fmt"
-	"go-rest-service/controllers"
 	"net/http"
 	"strings"
 
@@ -12,7 +11,7 @@ import (
 type GenericViewInput struct {
 	Router     *mux.Router
 	PathPrefix string
-	Controller *controllers.GenericControllerOutput
+	Controller *GenericControllerOutput
 	ModelPtr   interface{}
 }
 
@@ -20,16 +19,16 @@ type GenericViewOutput struct {
 	Router     *mux.Router
 	Subrouter  *mux.Router
 	PathPrefix string
-	Controller controllers.GenericControllerOutput
+	Controller GenericControllerOutput
 	ModelPtr   interface{}
 }
 
 func GenericView(
 	input *GenericViewInput,
 ) GenericViewOutput {
-	var controller controllers.GenericControllerOutput
+	var controller GenericControllerOutput
 	if input.Controller == nil {
-		controller = controllers.GenericController(input.PathPrefix, input.ModelPtr)
+		controller = GenericController(input.PathPrefix, input.ModelPtr)
 	} else {
 		controller = *input.Controller
 	}

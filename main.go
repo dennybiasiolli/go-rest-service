@@ -4,9 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"go-rest-service/middlewares"
 	"go-rest-service/models"
-	"go-rest-service/serializers"
 	"go-rest-service/utils"
 	"go-rest-service/views"
 	"log"
@@ -26,37 +24,6 @@ func main() {
 			&models.Product{},
 			&models.ResUser{},
 		)
-
-		// Create
-		// db.Create(&models.Product{Code: "L1212", Price: 123})
-
-		// Read
-		// var product models.Product
-		// var products []models.Product
-		// db.First(&product, 1)                   // find product with id 1
-		// db.First(&product, "code = ?", "L1212") // find product with code l1212
-		// db.Find(&products, "price > ?", 10)     // find products with price > 10
-
-		// Update - update product's price to 2000
-		// db.Model(&product).Update("Price", 2000)
-
-		// Delete - delete product
-		// db.Delete(&product)
-	})
-
-	utils.DbOperation(func(db *gorm.DB) {
-		var count int
-		db.Model(&models.ResUser{}).Count(&count)
-		fmt.Println("Count", count)
-
-		var users []models.ResUser
-		db.
-			Select([]string{"login", "password", "password_crypt"}).
-			Where("login = ?", "admin").
-			Find(&users)
-		for _, user := range users {
-			fmt.Println("Users", serializers.ResUserTinySerializer(&user))
-		}
 	})
 
 	var wait time.Duration
@@ -69,29 +36,12 @@ func main() {
 	flag.Parse()
 
 	router := mux.NewRouter()
-	router.Use(middlewares.LoggingMiddleware)
+	router.Use(utils.LoggingMiddleware)
 	// enabling CORS
 	router.Methods(http.MethodOptions)
-	router.Use(middlewares.CORSMiddleware)
+	router.Use(utils.CORSMiddleware)
 
-	// controller := controllers.GenericController("customName")
-	// views.GenericView(&views.GenericViewInput{
-	// 	Router:     router,
-	// 	PathPrefix: "/products",
-	// 	Controller: &controller,
-	// })
-
-	views.GenericView(&views.GenericViewInput{
-		Router:     router,
-		PathPrefix: "/products",
-		ModelPtr:   &models.Product{},
-	})
-
-	views.GenericView(&views.GenericViewInput{
-		Router:     router,
-		PathPrefix: "/res-users",
-		ModelPtr:   &models.ResUser{},
-	})
+	views.SetViews(router)
 
 	host := os.Getenv("HOST")
 	if host == "" {
