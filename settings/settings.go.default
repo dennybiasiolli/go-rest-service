@@ -22,3 +22,11 @@ const (
 	// Refer to https://gorm.io/docs/connecting_to_the_database.html for details
 	DatabaseConnectionString = "test.db"
 )
+
+/*
+	Router settings.
+*/
+const (
+	RouterActivateLog = true
+	RouterUseCORS     = true
+)

@@ -2,19 +2,19 @@ package views
 
 import (
 	"go-rest-service/models"
-	"go-rest-service/utils"
+	"go-rest-service/routing"
 
 	"github.com/gorilla/mux"
 )
 
 func SetViews(router *mux.Router) {
-	utils.GenericView(&utils.GenericViewInput{
+	routing.View(&routing.ViewInput{
 		Router:     router,
 		PathPrefix: "/products",
 		ModelPtr:   &models.Product{},
 	})
 
-	utils.GenericView(&utils.GenericViewInput{
+	routing.View(&routing.ViewInput{
 		Router:     router,
 		PathPrefix: "/res-users",
 		ModelPtr:   &models.ResUser{},

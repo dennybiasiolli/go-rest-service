@@ -1,4 +1,4 @@
-package utils
+package routing
 
 import (
 	"fmt"
@@ -8,27 +8,27 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type GenericViewInput struct {
+type ViewInput struct {
 	Router     *mux.Router
 	PathPrefix string
-	Controller *GenericControllerOutput
+	Controller *ControllerOutput
 	ModelPtr   interface{}
 }
 
-type GenericViewOutput struct {
+type ViewOutput struct {
 	Router     *mux.Router
 	Subrouter  *mux.Router
 	PathPrefix string
-	Controller GenericControllerOutput
+	Controller ControllerOutput
 	ModelPtr   interface{}
 }
 
-func GenericView(
-	input *GenericViewInput,
-) GenericViewOutput {
-	var controller GenericControllerOutput
+func View(
+	input *ViewInput,
+) ViewOutput {
+	var controller ControllerOutput
 	if input.Controller == nil {
-		controller = GenericController(input.PathPrefix, input.ModelPtr)
+		controller = Controller(input.PathPrefix, input.ModelPtr)
 	} else {
 		controller = *input.Controller
 	}
@@ -60,7 +60,7 @@ func GenericView(
 		HandleFunc("/{id:[0-9]+}/", controller.Delete).
 		Methods(http.MethodDelete)
 
-	return GenericViewOutput{
+	return ViewOutput{
 		Router:     input.Router,
 		Subrouter:  subrouter,
 		PathPrefix: input.PathPrefix,

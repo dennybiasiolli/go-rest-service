@@ -1,8 +1,9 @@
-package utils
+package routing
 
 import (
 	"encoding/json"
 	"fmt"
+	"go-rest-service/database"
 	"net/http"
 	"reflect"
 	"strings"
@@ -11,7 +12,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type GenericControllerOutput struct {
+type ControllerOutput struct {
 	ControllerName string
 	ModelPtr       interface{}
 	GetAll         func(w http.ResponseWriter, r *http.Request)
@@ -22,7 +23,7 @@ type GenericControllerOutput struct {
 	Delete         func(w http.ResponseWriter, r *http.Request)
 }
 
-func GenericController(controllerName string, modelPtr interface{}) GenericControllerOutput {
+func Controller(controllerName string, modelPtr interface{}) ControllerOutput {
 	if strings.HasPrefix(controllerName, "/") {
 		controllerName = controllerName[1:]
 	}
@@ -30,12 +31,12 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 	if T.Kind() == reflect.Ptr {
 		T = T.Elem()
 	}
-	return GenericControllerOutput{
+	return ControllerOutput{
 		ControllerName: controllerName,
 		ModelPtr:       modelPtr,
 
 		GetAll: func(w http.ResponseWriter, r *http.Request) {
-			DbOperation(func(db *gorm.DB) {
+			database.DbOperation(func(db *gorm.DB) {
 				resultsPtr := reflect.New(reflect.SliceOf(T)).Interface()
 				db.Find(resultsPtr)
 				JsonRespond(w, resultsPtr)
@@ -44,7 +45,7 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 
 		Get: func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
-			DbOperation(func(db *gorm.DB) {
+			database.DbOperation(func(db *gorm.DB) {
 				resultPtr := reflect.New(T).Interface()
 				res := db.First(resultPtr, vars["id"])
 				if res.RecordNotFound() {
@@ -77,7 +78,7 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 			}
 
 			// try to create the record into the database
-			DbOperation(func(db *gorm.DB) {
+			database.DbOperation(func(db *gorm.DB) {
 				if err := db.Create(modelDataPtr).Error; err != nil {
 					JsonRespondWithStatus(w, err, http.StatusBadRequest)
 					return
@@ -105,7 +106,7 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 			}
 
 			// try to update the record into the database
-			DbOperation(func(db *gorm.DB) {
+			database.DbOperation(func(db *gorm.DB) {
 				res := db.First(modelDataPtr, vars["id"])
 				if res.RecordNotFound() {
 					JsonRespondWithStatus(w, map[string]interface{}{
@@ -159,7 +160,7 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 			}
 
 			// try to update the record into the database
-			DbOperation(func(db *gorm.DB) {
+			database.DbOperation(func(db *gorm.DB) {
 				res := db.First(modelDataPtr, vars["id"])
 				if res.RecordNotFound() {
 					JsonRespondWithStatus(w, map[string]interface{}{
@@ -201,7 +202,7 @@ func GenericController(controllerName string, modelPtr interface{}) GenericContr
 			modelDataPtr := reflect.New(T).Interface()
 
 			// try to delete the record into the database
-			DbOperation(func(db *gorm.DB) {
+			database.DbOperation(func(db *gorm.DB) {
 				res := db.First(modelDataPtr, vars["id"])
 				if res.RecordNotFound() {
 					JsonRespondWithStatus(w, map[string]interface{}{
