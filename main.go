@@ -1,15 +1,24 @@
 package main
 
 import (
-	"go-rest-service/database"
 	"go-rest-service/models"
-	"go-rest-service/routing"
+	"go-rest-service/settings"
 	"go-rest-service/views"
+
+	"github.com/dennybiasiolli/gorestframework"
 )
 
 func main() {
-	database.InitDbConn(models.MigrateModels)
-	defer database.CloseDbConn()
+	gorestframework.InitDbConn(
+		settings.DatabaseDialect,
+		settings.DatabaseConnectionString,
+		models.MigrateModels,
+	)
+	defer gorestframework.CloseDbConn()
 
-	routing.StartHTTPListener(views.SetViews)
+	gorestframework.StartHTTPListener(
+		settings.RouterActivateLog,
+		settings.RouterUseCORS,
+		views.SetViews,
+	)
 }
