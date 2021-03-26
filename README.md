@@ -17,4 +17,8 @@ go get github.com/dgrijalva/jwt-go
 go get github.com/joho/godotenv
 ```
 
+#### Start
 
+`go run main.go`
+
+Open http://localhost:8000/products/ or http://localhost:8000/res-users/ in your browser
